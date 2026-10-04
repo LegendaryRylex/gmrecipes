@@ -1,0 +1,14 @@
+{
+  "required": false,
+  "minVersion": "0.8.5",
+  "package": "dev.rylex.gmrecipes.mixin",
+  "plugin": "dev.rylex.gmrecipes.mixin.GmRecipesMixinPlugin",
+  "compatibilityLevel": "JAVA_25",
+  "mixins": [],
+  "client": [
+    "SharedRecipeMappingsMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 0
+  }
+}

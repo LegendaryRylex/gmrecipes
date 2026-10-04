@@ -1,0 +1,4 @@
+{
+  "pack": { "description": "Hides the gmrecipes XyCraft Machines example page when that mod is absent", "pack_format": 84, "min_format": 84, "max_format": 84 },
+  "filter": { "block": [{ "namespace": "gmrecipes", "path": "^guides/gmrecipes/examples/xycraft_machines\\.md$" }] }
+}
