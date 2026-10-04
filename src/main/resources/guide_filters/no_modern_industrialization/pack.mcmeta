@@ -1,0 +1,4 @@
+{
+  "pack": { "description": "Hides the gmrecipes Modern Industrialization example page when that mod is absent", "pack_format": 34 },
+  "filter": { "block": [{ "namespace": "gmrecipes", "path": "^guides/gmrecipes/examples/modern_industrialization\\.md$" }] }
+}

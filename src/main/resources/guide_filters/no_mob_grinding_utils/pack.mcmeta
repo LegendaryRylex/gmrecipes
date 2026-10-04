@@ -1,0 +1,4 @@
+{
+  "pack": { "description": "Hides the gmrecipes Mob Grinding Utils example page when that mod is absent", "pack_format": 34 },
+  "filter": { "block": [{ "namespace": "gmrecipes", "path": "^guides/gmrecipes/examples/mob_grinding_utils\\.md$" }] }
+}

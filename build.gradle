@@ -1,0 +1,229 @@
+plugins {
+    id 'idea'
+    id 'java-library'
+    id 'net.neoforged.moddev' version '2.0.142'
+    id 'com.diffplug.spotless' version '8.8.0'
+}
+
+version = mod_version
+group = mod_group_id
+
+base {
+    archivesName = "$mod_id-$minecraft_version"
+}
+
+tasks.named('jar', Jar).configure {
+    from 'LICENSE'
+}
+
+java.toolchain.languageVersion = JavaLanguageVersion.of(21)
+
+repositories {
+    mavenCentral()
+    maven { url = 'https://maven.createmod.net' }
+    maven {
+        url = 'https://maven.ithundxr.dev/snapshots'
+        content { includeGroup 'com.tterrag.registrate' }
+    }
+    maven {
+        url = 'https://maven.blamejared.com/'
+        content { includeGroup 'mezz.jei' }
+    }
+    maven {
+        url = 'https://cursemaven.com'
+        content { includeGroup 'curse.maven' }
+    }
+}
+
+neoForge {
+    version = project.neo_version
+
+    parchment {
+        mappingsVersion = project.parchment_mappings_version
+        minecraftVersion = project.parchment_minecraft_version
+    }
+
+    runs {
+        client {
+            client()
+            systemProperty 'neoforge.enabledGameTestNamespaces', project.mod_id
+        }
+
+        server {
+            server()
+            programArgument '--nogui'
+            systemProperty 'neoforge.enabledGameTestNamespaces', project.mod_id
+        }
+
+        gameTestServer {
+            type = "gameTestServer"
+            systemProperty 'neoforge.enabledGameTestNamespaces', project.mod_id
+        }
+
+        data {
+            data()
+            programArguments.addAll '--mod', project.mod_id, '--all', '--output', file('src/generated/resources/').getAbsolutePath(), '--existing', file('src/main/resources/').getAbsolutePath()
+        }
+
+        configureEach {
+            systemProperty 'forge.logging.markers', 'REGISTRIES'
+            logLevel = org.slf4j.event.Level.DEBUG
+            jvmArgument '-Xmx4G'
+        }
+    }
+
+    mods {
+        "${mod_id}" {
+            sourceSet(sourceSets.main)
+        }
+    }
+}
+
+sourceSets.main.resources { srcDir 'src/generated/resources' }
+
+configurations {
+    runtimeClasspath.extendsFrom localRuntime
+    productiveBeesJar
+}
+
+def extractProductiveLib = tasks.register('extractProductiveLib', Copy) {
+    from(zipTree(configurations.productiveBeesJar.singleFile)) {
+        include 'META-INF/jarjar/productivelib-*.jar'
+        rename('productivelib-.*\\.jar', 'productivelib.jar')
+    }
+    includeEmptyDirs = false
+    into layout.buildDirectory.dir('jarjar')
+}
+
+dependencies {
+    compileOnly "org.appliedenergistics:guideme:${guideme_version}"
+    localRuntime "org.appliedenergistics:guideme:${guideme_runtime_version}"
+
+    compileOnly("com.simibubi.create:create-${minecraft_version}:${create_version}:slim") { transitive = false }
+    localRuntime("com.simibubi.create:create-${minecraft_version}:${create_version}:slim") { transitive = false }
+    compileOnly "net.createmod.ponder:ponder-neoforge:${ponder_version}+mc${minecraft_version}"
+    localRuntime "net.createmod.ponder:ponder-neoforge:${ponder_version}+mc${minecraft_version}"
+    compileOnly "com.tterrag.registrate:Registrate:${registrate_version}"
+    localRuntime "com.tterrag.registrate:Registrate:${registrate_version}"
+    compileOnly "dev.engine-room.flywheel:flywheel-neoforge-api-${minecraft_version}:${flywheel_version}"
+    localRuntime "dev.engine-room.flywheel:flywheel-neoforge-${minecraft_version}:${flywheel_version}"
+
+    localRuntime "mezz.jei:jei-${minecraft_version}-neoforge:${jei_version}"
+
+    compileOnly("curse.maven:mekanism-268560:${mekanism_file}") { transitive = false }
+    compileOnly("curse.maven:immersive-engineering-231951:${immersiveengineering_file}") { transitive = false }
+    compileOnly("curse.maven:ars-nouveau-401955:${ars_nouveau_file}") { transitive = false }
+    compileOnly("curse.maven:geckolib-388172:${geckolib_file}") { transitive = false }
+    compileOnly("curse.maven:occultism-361026:${occultism_file}") { transitive = false }
+    compileOnly("curse.maven:mystical-agriculture-246640:${mysticalagriculture_file}") { transitive = false }
+    compileOnly("curse.maven:cucumber-272335:${cucumber_file}") { transitive = false }
+    compileOnly("curse.maven:ender-io-64578:${enderio_file}") { transitive = false }
+    compileOnly("curse.maven:actually-additions-228404:${actuallyadditions_file}") { transitive = false }
+    compileOnly("curse.maven:integrated-dynamics-236307:${integrateddynamics_file}") { transitive = false }
+    compileOnly("curse.maven:cyclops-core-232758:${cyclopscore_file}") { transitive = false }
+    compileOnly("curse.maven:modern-industrialization-405388:${modern_industrialization_file}") { transitive = false }
+    compileOnly("curse.maven:extended-industrialization-1068418:${extended_industrialization_file}") { transitive = false }
+    compileOnly("curse.maven:productivebees-377897:${productivebees_file}") { transitive = false }
+    productiveBeesJar("curse.maven:productivebees-377897:${productivebees_file}") { transitive = false }
+    compileOnly files(layout.buildDirectory.file('jarjar/META-INF/jarjar/productivelib.jar')).builtBy(extractProductiveLib)
+    compileOnly("curse.maven:neovitae-1404763:${neovitae_file}") { transitive = false }
+    compileOnly("curse.maven:oritech-1030830:${oritech_file}") { transitive = false }
+    compileOnly("curse.maven:architectury-api-419699:${architectury_file}") { transitive = false }
+    compileOnly("curse.maven:malum-484064:${malum_file}") { transitive = false }
+    compileOnly("curse.maven:productivetrees-867074:${productivetrees_file}") { transitive = false }
+    compileOnly("curse.maven:farmers-delight-398521:${farmersdelight_file}") { transitive = false }
+    compileOnly("curse.maven:pneumaticcraft-repressurized-281849:${pneumaticcraft_file}") { transitive = false }
+    compileOnly("curse.maven:astral-sorcery-241721:${astralsorcery_file}") { transitive = false }
+    compileOnly("curse.maven:xycraft-machines-653791:${xycraft_machines_file}") { transitive = false }
+    compileOnly("curse.maven:industrial-foregoing-266515:${industrialforegoing_file}") { transitive = false }
+    compileOnly("curse.maven:apotheosis-313970:${apotheosis_file}") { transitive = false }
+    compileOnly("curse.maven:nautec-1107394:${nautec_file}") { transitive = false }
+    compileOnly("curse.maven:createaddition-439890:${createaddition_file}") { transitive = false }
+    compileOnly("curse.maven:create-big-cannons-646668:${createbigcannons_file}") { transitive = false }
+    compileOnly("curse.maven:hexerei-548599:${hexerei_file}") { transitive = false }
+    compileOnly("curse.maven:reliquary-reincarnations-241319:${reliquary_file}") { transitive = false }
+    compileOnly("curse.maven:roots-classic-295780:${rootsclassic_file}") { transitive = false }
+    compileOnly("curse.maven:ex-pattern-provider-892005:${extendedae_file}") { transitive = false }
+    compileOnly("curse.maven:glodium-957920:${glodium_file}") { transitive = false }
+    compileOnly("curse.maven:lodestone-616457:${lodestone_file}") { transitive = false }
+    compileOnly("curse.maven:titanium-287342:${titanium_file}") { transitive = false }
+    compileOnly("curse.maven:xycraft-653786:${xycraft_core_file}") { transitive = false }
+    compileOnly("curse.maven:xycraft-world-653789:${xycraft_world_file}") { transitive = false }
+    compileOnly("curse.maven:placebo-283644:${placebo_file}") { transitive = false }
+    compileOnly("curse.maven:apothic-attributes-898963:${apothic_attributes_file}") { transitive = false }
+    compileOnly("curse.maven:apothic-enchanting-1063926:${apothic_enchanting_file}") { transitive = false }
+    compileOnly("curse.maven:advancedae-1084104:${advanced_ae_file}") { transitive = false }
+    compileOnly("curse.maven:draconic-evolution-223565:${draconicevolution_file}") { transitive = false }
+    compileOnly("curse.maven:brandons-core-231382:${brandonscore_file}") { transitive = false }
+    compileOnly("curse.maven:more-red-387638:${morered_file}") { transitive = false }
+    compileOnly("curse.maven:pylons-518211:${pylons_file}") { transitive = false }
+    compileOnly("curse.maven:mystical-automation-1265613:${mysticalautomation_file}") { transitive = false }
+    compileOnly("curse.maven:mob-grinding-utils-254241:${mob_grinding_utils_file}") { transitive = false }
+    compileOnly("curse.maven:treetap-927874:${treetap_file}") { transitive = false }
+    compileOnly("curse.maven:just-dire-things-1002348:${justdirethings_file}") { transitive = false }
+    compileOnly("curse.maven:super-factory-manager-306935:${sfm_file}") { transitive = false }
+    compileOnly("curse.maven:rftools-utility-342466:${rftoolsutility_file}") { transitive = false }
+    compileOnly("curse.maven:genetics-resequenced-1040563:${geneticsresequenced_file}") { transitive = false }
+    compileOnly("curse.maven:irons-spells-n-spellbooks-855414:${irons_spellbooks_file}") { transitive = false }
+    compileOnly("curse.maven:powah-rearchitected-633483:${powah_file}") { transitive = false }
+    compileOnly("curse.maven:cognition-mod-579484:${cognition_file}") { transitive = false }
+    compileOnly("curse.maven:eternal-starlight-1080592:${eternal_starlight_file}") { transitive = false }
+    compileOnly("curse.maven:forbidden-arcanus-309858:${forbidden_arcanus_file}") { transitive = false }
+    compileOnly("curse.maven:pagans-blessing-952071:${paganbless_file}") { transitive = false }
+    compileOnly("curse.maven:mcjtylib-233105:${mcjtylib_file}") { transitive = false }
+    compileOnly("curse.maven:valhelsia-core-416935:${valhelsia_core_file}") { transitive = false }
+
+    testImplementation platform('org.junit:junit-bom:5.14.4')
+    testImplementation 'org.junit.jupiter:junit-jupiter'
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+}
+
+test {
+    useJUnitPlatform()
+    systemProperty 'gmrecipes.projectDir', projectDir.absolutePath
+}
+
+spotless {
+    java {
+        target 'src/*/java/**/*.java'
+        importOrder()
+        removeUnusedImports()
+        palantirJavaFormat()
+        trimTrailingWhitespace()
+        endWithNewline()
+    }
+}
+
+var generateModMetadata = tasks.register("generateModMetadata", ProcessResources) {
+    var replaceProperties = [
+            minecraft_version      : minecraft_version,
+            minecraft_version_range: minecraft_version_range,
+            neo_version            : neo_version,
+            neo_version_range      : neo_version_range,
+            loader_version_range   : loader_version_range,
+            mod_id                 : mod_id,
+            mod_name               : mod_name,
+            mod_license            : mod_license,
+            mod_version            : mod_version,
+            mod_authors            : mod_authors,
+            mod_description        : mod_description,
+            create_version_range   : create_version_range
+    ]
+    inputs.properties replaceProperties
+    expand replaceProperties
+    from "src/main/templates"
+    into "build/generated/sources/modMetadata"
+}
+sourceSets.main.resources.srcDir generateModMetadata
+neoForge.ideSyncTask generateModMetadata
+
+tasks.withType(JavaCompile).configureEach {
+    options.encoding = 'UTF-8'
+}
+
+idea {
+    module {
+        downloadSources = true
+        downloadJavadoc = true
+    }
+}

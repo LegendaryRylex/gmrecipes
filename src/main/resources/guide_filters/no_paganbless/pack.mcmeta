@@ -1,0 +1,4 @@
+{
+  "pack": { "description": "Hides the gmrecipes Pagan's Blessing example page when that mod is absent", "pack_format": 34 },
+  "filter": { "block": [{ "namespace": "gmrecipes", "path": "^guides/gmrecipes/examples/paganbless\\.md$" }] }
+}
